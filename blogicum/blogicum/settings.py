@@ -11,7 +11,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
 ]
 INTERNAL_IPS = [
-    "127.0.0.1",
+    '127.0.0.1',
 ]
 
 INSTALLED_APPS = [
@@ -23,7 +23,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'blog.apps.BlogConfig',
     'pages.apps.PagesConfig',
-    'users.apps.UsersConfig',
     'django_bootstrap5',
     'debug_toolbar',
 ]
@@ -101,6 +100,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -111,8 +111,4 @@ EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
 
 LOGIN_REDIRECT_URL = 'blog:index'
 
-LOGIN_URL = 'users:login'
-
-CSRF_FAILURE_VIEW = 'pages.views.csrf_failure'
-
-AUTH_USER_MODEL = 'users.User'
+LOGIN_URL = 'login'

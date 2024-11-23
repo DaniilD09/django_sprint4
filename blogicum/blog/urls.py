@@ -1,6 +1,4 @@
-from django.urls import path
-
-from django.contrib import admin
+from django.urls import include, path
 
 from . import views
 
@@ -38,6 +36,16 @@ urlpatterns = [
         name='category_posts'
     ),
     path(
+        'profile/<str:username>/',
+        views.ProfileListView.as_view(),
+        name='profile'
+    ),
+    path(
+        'profile_edit/',
+        views.UserProfileUpdateView.as_view(),
+        name='edit_profile',
+    ),
+    path(
         'posts/<int:post_id>/comment/',
         views.CommentCreateView.as_view(),
         name='add_comment',
@@ -53,13 +61,7 @@ urlpatterns = [
         name='delete_comment',
     ),
     path(
-        'profile/<str:username>',
-        views.ProfileListView,
-        name='profile'
-    ),
-    path(
-        'profile/edit/',
-        views.UserUpdateView.as_view(),
-        name='edit_profile',
+        'auth/',
+        include('django.contrib.auth.urls')
     ),
 ]

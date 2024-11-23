@@ -3,7 +3,7 @@ from django.db.models import Count
 from django.utils import timezone
 
 
-def filter_published_posts(posts):
+def filtered_post(posts):
     return posts.filter(
         is_published=True,
         pub_date__lte=timezone.now(),

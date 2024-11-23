@@ -1,10 +1,12 @@
 from django import forms
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserCreationForm
 from django.utils import timezone
 
-from .models import Post, Comment, User
+from .models import Comment, Post, User
 
 
-class CreatePostForm(forms.ModelForm):
+class PostForm(forms.ModelForm):
     pub_date = forms.DateTimeField(
         label='Дата и время',
         initial=timezone.now,
@@ -12,13 +14,22 @@ class CreatePostForm(forms.ModelForm):
         widget=forms.DateTimeInput(
             attrs={
                 'type': 'datetime-local',
-                'format': '%Y-%m-%dT%H:%M',
-            },),
+            },
+            format='%Y-%m-%dT%H:%M',
+        ),
     )
 
     class Meta:
         model = Post
-        exclude = ('author', 'created_at',)
+        fields = (
+            'title',
+            'image',
+            'text',
+            'pub_date',
+            'location',
+            'category',
+            'is_published',
+        )
 
 
 class CommentForm(forms.ModelForm):
@@ -29,5 +40,11 @@ class CommentForm(forms.ModelForm):
 
 class EditUserProfileForm(forms.ModelForm):
     class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name', 'last_name')
+
+
+class CustomUserCreationForm(UserCreationForm):
+    class Meta(UserCreationForm.Meta):
         model = User
         fields = ('username', 'email', 'first_name', 'last_name')

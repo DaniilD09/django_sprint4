@@ -18,5 +18,9 @@ class LocationAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-# Настройка отображения пустых значений
+@admin.register(models.Comment)
+class CommentAdmin(admin.ModelAdmin):
+    search_fields = ('title', 'description',)
+
+
 admin.site.empty_value_display = 'Не задано'
