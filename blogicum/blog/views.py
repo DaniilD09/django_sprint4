@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count
 from django.contrib.auth import login
@@ -55,8 +55,9 @@ class PostUpdateView(LoginRequiredMixin, PostMixin, UpdateView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class PostDeleteView(LoginRequiredMixin, PostMixin,
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, PostMixin,
                      UpdateView, DeleteView):
+    pk_url_kwarg = 'post_id'
 
     def test_func(self):
         object = self.get_object()
@@ -144,6 +145,7 @@ class PostDetailView(DetailView):
     model = Post
     form_class = PostForm
     template_name = 'blog/detail.html'
+    pk_url_kwarg = 'post_id'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
