@@ -72,7 +72,7 @@ class Post(PublishedModel):
         User,
         on_delete=models.CASCADE,
         verbose_name='Автор публикации',
-        related_name='posts'
+        related_name='users'
     )
     location = models.ForeignKey(
         Location,
@@ -96,8 +96,8 @@ class Post(PublishedModel):
     )
     image = models.ImageField(
         verbose_name='Изображение',
-        upload_to='img/',
-        blank=True
+        blank=True,
+        upload_to='img/'
     )
     objects = models.Manager()
     published_posts = PublishedRecordingsManager()
@@ -109,12 +109,6 @@ class Post(PublishedModel):
 
     def __str__(self):
         return self.title[:TEXT_LENGHT]
-
-    def get_absolute_url(self):
-        return reversed(
-            'blog:post_detail',
-            kwargs={'post_pk': self.pk}
-        )
 
 
 class Comment(PublishedModel):

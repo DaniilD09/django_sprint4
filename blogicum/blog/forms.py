@@ -1,19 +1,19 @@
 from django import forms
+from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.utils import timezone
 
 from .models import Comment, Post, User
 
+User = get_user_model()
+
 
 class PostForm(forms.ModelForm):
     pub_date = forms.DateTimeField(
-        label='Дата и время',
         initial=timezone.now,
         required=True,
         widget=forms.DateTimeInput(
-            attrs={
-                'type': 'datetime-local',
-            },
+            attrs={'type': 'datetime-local', },
             format='%Y-%m-%dT%H:%M',
         ),
     )

@@ -1,7 +1,7 @@
 from django.urls import reverse
 
 from .models import Comment, Post
-from blog.forms import PostForm
+from .forms import CommentForm, PostForm
 
 
 class PostMixin:
@@ -12,14 +12,13 @@ class PostMixin:
 
 class CommentEditMixin:
     model = Comment
-    pk_url_kwarg = 'comment_pk'
+    form_class = CommentForm
     template_name = 'blog/comment.html'
+    pk_url_kwarg = 'comment_id'
 
     def get_success_url(self):
-        return reverse(
-            'blog:post_detail',
-            args={self.kwargs['post_id']}
-        )
+        return reverse('blog:post_detail',
+                       kwargs={'post_id': self.kwargs['post_id']})
 
 # Привет иногда тут буду писать свои идеи может подкоректируешь заодно
 # 1. по прошлым всем правкам, я думаю ты попросишь сделать отдельный файл для

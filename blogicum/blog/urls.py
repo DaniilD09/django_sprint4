@@ -26,11 +26,6 @@ urlpatterns = [
         name='edit_post'
     ),
     path(
-        'posts/<int:post_id>/delete/',
-        views.PostDeleteView.as_view(),
-        name='delete_post'
-    ),
-    path(
         'category/<slug:category_slug>/',
         views.CategoryListView.as_view(),
         name='category_posts'
@@ -61,7 +56,8 @@ urlpatterns = [
         name='delete_comment',
     ),
     path(
-        'auth/',
-        include('django.contrib.auth.urls')
+        'posts/<slug:post_id>/delete/',
+        views.PostDeleteView.as_view(),
+        name='delete_post'
     ),
 ]

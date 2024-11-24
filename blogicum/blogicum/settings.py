@@ -4,7 +4,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure--s@1ebeg^k&cjk(attkw6nv^$w(di)v6%o+otq_890f*96a^*v'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -112,3 +112,7 @@ EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
 LOGIN_REDIRECT_URL = 'blog:index'
 
 LOGIN_URL = 'login'
+
+MEDIA_URL = '/media/'
+
+CSRF_FAILURE_VIEW = 'pages.views.csrf_failure'
