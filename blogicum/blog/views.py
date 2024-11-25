@@ -15,7 +15,7 @@ from django.views.generic import (
 from blogicum.constants import PAGINATED_BY
 
 from .forms import (
-    CommentForm,
+    CreateCommentForm,
     PostForm,
     CustomUserCreationForm,
     EditUserProfileForm,
@@ -40,8 +40,24 @@ class PostCreateView(LoginRequiredMixin, PostMixin, CreateView):
         )
 
 
+class PostDeleteView(UserPassesTestMixin, PostMixin,
+                     DeleteView):
+    pk_url_kwarg = 'post_id'
+
+    def test_func(self):
+        object = self.get_object()
+        return object.author == self.request.user
+
+    def delete(self, request, *args, **kwargs):
+        post = get_object_or_404(Post, pk=self.kwargs[self.pk_url_kwarg])
+        if self.request.user != post.author:
+            return redirect('blog:index')
+        return super().delete(request, *args, **kwargs)
+
+
 class PostUpdateView(LoginRequiredMixin, PostMixin, UpdateView):
     pk_url_kwarg = 'post_id'
+    form_class = PostForm
 
     def get_success_url(self):
         return reverse(
@@ -49,29 +65,14 @@ class PostUpdateView(LoginRequiredMixin, PostMixin, UpdateView):
             kwargs={'post_id': self.kwargs['post_id']}
         )
 
-    def dispatch(self, request, *args, **kwargs):
-        if self.get_object().author != request.user:
-            return redirect('blog:post_detail', post_id=kwargs['post_id'])
-        return super().dispatch(request, *args, **kwargs)
-
-
-class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, PostMixin,
-                     UpdateView, DeleteView):
-    pk_url_kwarg = 'post_id'
-
     def test_func(self):
         object = self.get_object()
         return object.author == self.request.user
 
-    def get_success_url(self):
-        return reverse(
-            'blog:profile', kwargs={'username': self.request.user}
-        )
-
 
 class CommentCreateView(LoginRequiredMixin, CommentEditMixin, CreateView):
-    form_class = CommentForm
     pk_url_kwarg = 'post_id'
+    form_class = CreateCommentForm
 
     def form_valid(self, form):
         form.instance.post = get_object_or_404(Post, pk=self.kwargs['post_id'])
@@ -79,33 +80,25 @@ class CommentCreateView(LoginRequiredMixin, CommentEditMixin, CreateView):
         return super().form_valid(form)
 
 
-class CommentUpdateView(LoginRequiredMixin, CommentEditMixin, UpdateView):
-    form_class = CommentForm
-
-    def get_success_url(self):
-        return reverse(
-            'blog:post_detail',
-            kwargs={'post_id': self.kwargs['post_id']}
-        )
+class CommentDeleteView(LoginRequiredMixin, CommentEditMixin, DeleteView):
 
     def dispatch(self, request, *args, **kwargs):
-        instance = get_object_or_404(Comment, pk=kwargs['comment_id'])
-        if instance.author != request.user:
-            raise PermissionDenied
+        comment = get_object_or_404(
+            Comment,
+            pk=kwargs['comment_id'],
+        )
+        if comment.author != request.user:
+            return redirect('blog:post_detail', id=kwargs['post_id'])
         return super().dispatch(request, *args, **kwargs)
 
 
-class CommentDeleteView(LoginRequiredMixin, CommentEditMixin, DeleteView):
-    def get_success_url(self):
-        return reverse(
-            'blog:post_detail',
-            kwargs={'post_id': self.kwargs['post_id']}
-        )
+class CommentUpdateView(LoginRequiredMixin, CommentEditMixin, UpdateView):
+    form_class = CreateCommentForm
 
     def dispatch(self, request, *args, **kwargs):
-        instance = get_object_or_404(Comment, pk=kwargs['comment_id'])
-        if instance.author != request.user:
-            raise PermissionDenied
+        comment = get_object_or_404(Comment, pk=kwargs['comment_id'],)
+        if comment.author != request.user:
+            return redirect('blog:post_detail', id=kwargs['post_id'])
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -143,13 +136,12 @@ class CategoryListView(ListView):
 
 class PostDetailView(DetailView):
     model = Post
-    form_class = PostForm
     template_name = 'blog/detail.html'
     pk_url_kwarg = 'post_id'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'] = CommentForm()
+        context['form'] = CreateCommentForm()
         context['comments'] = self.object.comments.select_related('author')
         return context
 

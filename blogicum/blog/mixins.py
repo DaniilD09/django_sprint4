@@ -1,18 +1,14 @@
 from django.urls import reverse
 
-from .models import Comment, Post
-from .forms import CommentForm, PostForm
+from .models import Post
 
 
 class PostMixin:
     model = Post
-    form_class = PostForm
     template_name = 'blog/create.html'
 
 
 class CommentEditMixin:
-    model = Comment
-    form_class = CommentForm
     template_name = 'blog/comment.html'
     pk_url_kwarg = 'comment_id'
 
