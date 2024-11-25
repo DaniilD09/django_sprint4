@@ -26,6 +26,7 @@ from .managers import filtered_post
 
 
 class PostCreateView(LoginRequiredMixin, PostMixin, CreateView):
+    form_class = PostForm
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -47,15 +48,19 @@ class PostDeleteView(UserPassesTestMixin, PostMixin,
     def test_func(self):
         object = self.get_object()
         return object.author == self.request.user
+    
+    def handle_no_permission(self):
+        return redirect(
+            'blog:post_detail', post_id = self.get_object().pk
+        )
+    
+    def get_success_url(self):
+        return reverse(
+            'blog:index',
+        )
 
-    def delete(self, request, *args, **kwargs):
-        post = get_object_or_404(Post, pk=self.kwargs[self.pk_url_kwarg])
-        if self.request.user != post.author:
-            return redirect('blog:index')
-        return super().delete(request, *args, **kwargs)
 
-
-class PostUpdateView(LoginRequiredMixin, PostMixin, UpdateView):
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, PostMixin, UpdateView):
     pk_url_kwarg = 'post_id'
     form_class = PostForm
 
@@ -68,6 +73,12 @@ class PostUpdateView(LoginRequiredMixin, PostMixin, UpdateView):
     def test_func(self):
         object = self.get_object()
         return object.author == self.request.user
+    
+    def handle_no_permission(self):
+        return redirect(
+            'blog:post_detail', post_id = self.get_object().pk
+        )
+    
 
 
 class CommentCreateView(LoginRequiredMixin, CommentEditMixin, CreateView):
@@ -81,6 +92,7 @@ class CommentCreateView(LoginRequiredMixin, CommentEditMixin, CreateView):
 
 
 class CommentDeleteView(LoginRequiredMixin, CommentEditMixin, DeleteView):
+    model = Comment
 
     def dispatch(self, request, *args, **kwargs):
         comment = get_object_or_404(
@@ -88,17 +100,18 @@ class CommentDeleteView(LoginRequiredMixin, CommentEditMixin, DeleteView):
             pk=kwargs['comment_id'],
         )
         if comment.author != request.user:
-            return redirect('blog:post_detail', id=kwargs['post_id'])
+            return redirect('blog:post_detail', post_id=kwargs['post_id'])
         return super().dispatch(request, *args, **kwargs)
 
 
 class CommentUpdateView(LoginRequiredMixin, CommentEditMixin, UpdateView):
     form_class = CreateCommentForm
+    model = Comment
 
     def dispatch(self, request, *args, **kwargs):
         comment = get_object_or_404(Comment, pk=kwargs['comment_id'],)
         if comment.author != request.user:
-            return redirect('blog:post_detail', id=kwargs['post_id'])
+            return redirect('blog:post_detail', post_id=kwargs['post_id'])
         return super().dispatch(request, *args, **kwargs)
 
 
