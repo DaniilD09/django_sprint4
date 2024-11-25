@@ -1,5 +1,4 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.core.exceptions import PermissionDenied
 from django.db.models import Count
 from django.contrib.auth import login
 from django.shortcuts import get_object_or_404, redirect
@@ -48,19 +47,20 @@ class PostDeleteView(UserPassesTestMixin, PostMixin,
     def test_func(self):
         object = self.get_object()
         return object.author == self.request.user
-    
+
     def handle_no_permission(self):
         return redirect(
-            'blog:post_detail', post_id = self.get_object().pk
+            'blog:post_detail', post_id=self.get_object().pk
         )
-    
+
     def get_success_url(self):
         return reverse(
             'blog:index',
         )
 
 
-class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, PostMixin, UpdateView):
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin,
+                     PostMixin, UpdateView):
     pk_url_kwarg = 'post_id'
     form_class = PostForm
 
@@ -73,12 +73,11 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, PostMixin, UpdateV
     def test_func(self):
         object = self.get_object()
         return object.author == self.request.user
-    
+
     def handle_no_permission(self):
         return redirect(
-            'blog:post_detail', post_id = self.get_object().pk
+            'blog:post_detail', post_id=self.get_object().pk
         )
-    
 
 
 class CommentCreateView(LoginRequiredMixin, CommentEditMixin, CreateView):
