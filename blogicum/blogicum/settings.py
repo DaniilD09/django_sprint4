@@ -9,7 +9,10 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
+    'www.DaniilD09.pythonanywhere.com',
+    'DaniilD09.pythonanywhere.com',
 ]
+
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
