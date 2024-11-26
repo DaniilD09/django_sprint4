@@ -27,10 +27,6 @@ urlpatterns = [
         admin.site.urls
     ),
     path(
-        '__debug__/',
-        include('debug_toolbar.urls')
-    ),
-    path(
         'auth/registration/',
         CreateView.as_view(
             template_name='registration/registration_form.html',
