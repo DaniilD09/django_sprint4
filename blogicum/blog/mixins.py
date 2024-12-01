@@ -1,6 +1,13 @@
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth import login
+from django.contrib.auth import get_user_model
+from django.shortcuts import redirect
 from django.urls import reverse
 
-from .models import Post
+from .forms import CreateCommentForm
+from .models import Post, Comment
+
+User = get_user_model()
 
 
 class PostMixin:
@@ -11,21 +18,37 @@ class PostMixin:
 class CommentEditMixin:
     template_name = 'blog/comment.html'
     pk_url_kwarg = 'comment_id'
+    model = Comment
+    form_class = CreateCommentForm
 
     def get_success_url(self):
-        return reverse('blog:post_detail',
-                       kwargs={'post_id': self.kwargs['post_id']})
+        return reverse(
+            'blog:post_detail',
+            kwargs={'post_id': self.kwargs['post_id']}
+        )
 
-# Привет иногда тут буду писать свои идеи может подкоректируешь заодно
-# 1. по прошлым всем правкам, я думаю ты попросишь сделать отдельный файл для
-# Миксин
-# 2. в константу добавил значение для пагинатора сразу стараюсь делать красиво,
-# 3. избавился от core, модель из нее добавил в blog/models.py
-# 4. изменил urls.py в pages
-# 5. пытался сделать отдельное приложение users не смог пройти автотесты и не
-# смог нормально поменять шаблоны, поэтому все в куче
-# 6. скажу честно кое где списал кое где ребята помогали кое где сам
-# 7. очень надеюсь что направишь и подскажешь что можно сделать хорошо очень
-# хочу сделать красиво и правильно
-# 8 капец 4 дня страдал что бы пройти автотесты а дело был в toolbar
-# был установлен не той версии
+
+class LoginMixin:
+    def form_valid(self, form):
+        user = form.save()
+        login(self.request, user)
+        return redirect('blog:index')
+
+
+class OnlyAuthorMixin(UserPassesTestMixin):
+    def test_func(self):
+        object = self.get_object()
+        return object.author == self.request.user
+
+    def handle_no_permission(self):
+        return redirect(
+            'blog:post_detail', post_id=self.get_object().pk
+        )
+
+
+# Привет блогикум urls посмотри что то не совсем понял что да как
+# Поправил не много
+# Отправляю на проверку потому что дальше буду путаться надо новый старт
+# смотри сверху сделал импорты по алфовиту
+# cначала импорт делаем forms? потому что буква F по алфавиту стоит
+# первее чем models? буква M? верно понимаю

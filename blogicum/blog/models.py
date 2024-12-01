@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
 
 from blogicum.constants import TEXT_LENGHT
 from .managers import PublishedRecordingsManager
@@ -99,6 +99,7 @@ class Post(PublishedModel):
         blank=True,
         upload_to='img/'
     )
+
     objects = models.Manager()
     published_posts = PublishedRecordingsManager()
 

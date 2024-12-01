@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.utils import timezone
 
-from .models import Comment, Post, User
+from .models import Comment, Post
 
 User = get_user_model()
 
@@ -20,15 +20,7 @@ class PostForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        fields = (
-            'title',
-            'image',
-            'text',
-            'pub_date',
-            'location',
-            'category',
-            'is_published',
-        )
+        exclude = ('author', 'created_at')
 
 
 class CreateCommentForm(forms.ModelForm):
