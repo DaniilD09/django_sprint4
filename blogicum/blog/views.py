@@ -138,7 +138,8 @@ class CategoryListView(ListView):
 
     def get_queryset(self):
         category = get_object_or_404(
-            Category, slug=self.kwargs.get('category_slug'), is_published=True
+            Category,
+            slug=self.kwargs.get('category_slug'), is_published=True
         )
         return category.posts(manager='published_posts').all()
 
@@ -164,9 +165,11 @@ class PostDetailView(DetailView):
                     'category'),
                     pk=self.kwargs.get(self.pk_url_kwarg))
             )
-        return get_object_or_404(Post.published_posts.annotate(
-            comment_count=Count('comments')
-        ).order_by('-pub_date'))
+        return get_object_or_404(
+            Post.published_posts.annotate(
+                comment_count=Count('comments')
+            ).order_by('-pub_date')
+        )
 
 
 class IndexListView(ListView):
