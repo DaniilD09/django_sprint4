@@ -28,13 +28,6 @@ class CommentEditMixin:
         )
 
 
-class LoginMixin:
-    def form_valid(self, form):
-        user = form.save()
-        login(self.request, user)
-        return redirect('blog:index')
-
-
 class OnlyAuthorMixin(UserPassesTestMixin):
     def test_func(self):
         object = self.get_object()
@@ -44,11 +37,8 @@ class OnlyAuthorMixin(UserPassesTestMixin):
         return redirect(
             'blog:post_detail', post_id=self.get_object().pk
         )
-
-
-# Привет блогикум urls посмотри что то не совсем понял что да как
-# Поправил не много
-# Отправляю на проверку потому что дальше буду путаться надо новый старт
-# смотри сверху сделал импорты по алфовиту
-# cначала импорт делаем forms? потому что буква F по алфавиту стоит
-# первее чем models? буква M? верно понимаю
+# удалил класс UserCreateView
+# удалил миксин LoginMixin
+# users заменил на authors
+# создал файл utils.py там подкоректировал функцию
+# чучуть отредачил кое где переносы кое где лишнее поубирал

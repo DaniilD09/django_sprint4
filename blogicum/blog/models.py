@@ -72,7 +72,7 @@ class Post(PublishedModel):
         User,
         on_delete=models.CASCADE,
         verbose_name='Автор публикации',
-        related_name='users'
+        related_name='authors'
     )
     location = models.ForeignKey(
         Location,

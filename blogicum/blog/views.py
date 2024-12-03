@@ -1,7 +1,8 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
+
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -11,11 +12,9 @@ from django.views.generic import (
 )
 
 from blogicum.constants import PAGINATED_BY
-
 from .forms import (
     CreateCommentForm,
     PostForm,
-    CustomUserCreationForm,
     EditUserProfileForm,
 )
 from .models import Category, Post, User
@@ -23,9 +22,8 @@ from .mixins import (
     PostMixin,
     CommentEditMixin,
     OnlyAuthorMixin,
-    LoginMixin,
 )
-from .managers import filtered_post
+from .utils import post_query
 
 
 class PostCreateView(
@@ -52,7 +50,6 @@ class PostDeleteView(
     LoginRequiredMixin,
     PostMixin,
     OnlyAuthorMixin,
-    UpdateView,
     DeleteView
 ):
     pk_url_kwarg = 'post_id'
@@ -111,45 +108,42 @@ class CommentUpdateView(
     pass
 
 
-class ProfileListView(
-    ListView
-):
+class ProfileListView(ListView):
     model = Post
     template_name = 'blog/profile.html'
     paginate_by = PAGINATED_BY
 
     def get_queryset(self):
         profile = get_object_or_404(
-            User, username=self.kwargs.get('username'))
-        return profile.users.all().annotate(
+            User,
+            username=self.kwargs.get('username')
+        )
+# просто перенсти скобочку?
+        return profile.authors.all().annotate(
             comment_count=Count('comments')).order_by('-pub_date')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context['profile'] = get_object_or_404(
-            User, username=self.kwargs.get('username'))
+            User,
+            username=self.kwargs.get('username')
+        )
         return context
 
 
-class CategoryListView(
-    ListView
-):
+class CategoryListView(ListView):
     model = Post
     template_name = 'blog/category.html'
     context_object_name = 'post_list'
     paginate_by = PAGINATED_BY
 
     def get_queryset(self):
-        category_slug = self.kwargs['category_slug']
-        category = get_object_or_404(Category, slug=category_slug,
-                                     is_published=True)
-        posts = filtered_post(category.posts.all())
-        return posts
+        category = get_object_or_404(
+            Category, slug=self.kwargs.get('category_slug'), is_published=True)
+        return category.posts(manager='published_posts').all()
 
 
-class PostDetailView(
-    DetailView
-):
+class PostDetailView(DetailView):
     model = Post
     template_name = 'blog/detail.html'
     pk_url_kwarg = 'post_id'
@@ -170,34 +164,27 @@ class PostDetailView(
                     'category'),
                     pk=self.kwargs.get(self.pk_url_kwarg)))
         return (
-            get_object_or_404(filtered_post(self.model.objects),
+            get_object_or_404(post_query(self.model.objects),
                               pk=self.kwargs.get(self.pk_url_kwarg)))
 
 
-class IndexListView(
-    ListView
-):
+class IndexListView(ListView):
     model = Post
     template_name = 'blog/index.html'
     context_object_name = 'post_list'
     paginate_by = PAGINATED_BY
-    queryset = filtered_post(Post.objects)
-
-
-class UserCreateView(
-    CreateView, LoginMixin
-):
-    template_name = 'registration/registration_form.html'
-    form_class = CustomUserCreationForm
-    success_url = reverse_lazy('users:login')
+    queryset = post_query(Post.objects)
 
 
 class UserProfileUpdateView(
-    LoginRequiredMixin, LoginMixin, UpdateView
+    LoginRequiredMixin, UpdateView
 ):
     model = User
     form_class = EditUserProfileForm
     template_name = 'blog/user.html'
+
+    def get_success_url(self):
+        return reverse('blog:index')
 
     def get_object(self):
         return self.request.user
