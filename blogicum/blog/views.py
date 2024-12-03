@@ -117,9 +117,9 @@ class ProfileListView(ListView):
             User,
             username=self.kwargs.get('username')
         )
-# просто перенсти скобочку?
         return profile.posts.all().annotate(
-            comment_count=Count('comments')).order_by('-pub_date')
+            comment_count=Count('comments')
+        ).order_by('-pub_date')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -159,10 +159,10 @@ class PostDetailView(DetailView):
         post = super().get_object(queryset=queryset)
         if post.author == self.request.user:
             return (
-                get_object_or_404(self.model.objects.select_related(
-                    'location',
-                    'author',
-                    'category'),
+                get_object_or_404(
+                    self.model.objects.select_related(
+                        'location', 'author', 'category'
+                    ),
                     pk=self.kwargs.get(self.pk_url_kwarg))
             )
         return get_object_or_404(
