@@ -23,7 +23,6 @@ from .mixins import (
     CommentEditMixin,
     OnlyAuthorMixin,
 )
-from .utils import post_query
 
 
 class PostCreateView(
@@ -119,7 +118,7 @@ class ProfileListView(ListView):
             username=self.kwargs.get('username')
         )
 # просто перенсти скобочку?
-        return profile.authors.all().annotate(
+        return profile.posts.all().annotate(
             comment_count=Count('comments')).order_by('-pub_date')
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -139,7 +138,8 @@ class CategoryListView(ListView):
 
     def get_queryset(self):
         category = get_object_or_404(
-            Category, slug=self.kwargs.get('category_slug'), is_published=True)
+            Category, slug=self.kwargs.get('category_slug'), is_published=True
+        )
         return category.posts(manager='published_posts').all()
 
 
@@ -162,10 +162,11 @@ class PostDetailView(DetailView):
                     'location',
                     'author',
                     'category'),
-                    pk=self.kwargs.get(self.pk_url_kwarg)))
-        return (
-            get_object_or_404(post_query(self.model.objects),
-                              pk=self.kwargs.get(self.pk_url_kwarg)))
+                    pk=self.kwargs.get(self.pk_url_kwarg))
+            )
+        return get_object_or_404(Post.published_posts.annotate(
+            comment_count=Count('comments')
+        ).order_by('-pub_date'))
 
 
 class IndexListView(ListView):
@@ -173,7 +174,9 @@ class IndexListView(ListView):
     template_name = 'blog/index.html'
     context_object_name = 'post_list'
     paginate_by = PAGINATED_BY
-    queryset = post_query(Post.objects)
+    queryset = Post.published_posts.annotate(
+        comment_count=Count('comments')
+    ).order_by('-pub_date')
 
 
 class UserProfileUpdateView(
