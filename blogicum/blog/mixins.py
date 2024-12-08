@@ -36,8 +36,3 @@ class OnlyAuthorMixin(UserPassesTestMixin):
         return redirect(
             'blog:post_detail', post_id=self.get_object().pk
         )
-# удалил класс UserCreateView
-# удалил миксин LoginMixin
-# users заменил на authors
-# создал файл utils.py там подкоректировал функцию
-# чучуть отредачил кое где переносы кое где лишнее поубирал

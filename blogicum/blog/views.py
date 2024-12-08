@@ -81,7 +81,6 @@ class CommentCreateView(
     CreateView
 ):
     pk_url_kwarg = 'post_id'
-    form_class = CreateCommentForm
 
     def form_valid(self, form):
         form.instance.post = get_object_or_404(Post, pk=self.kwargs['post_id'])
@@ -168,7 +167,7 @@ class PostDetailView(DetailView):
         return get_object_or_404(
             Post.published_posts.annotate(
                 comment_count=Count('comments')
-            ).order_by('-pub_date')
+            ).order_by('-pub_date'), pk=self.kwargs.get(self.pk_url_kwarg)
         )
 
 
